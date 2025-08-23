@@ -1,0 +1,118 @@
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-page-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 60px); /* Adjust for header */
+  width: 100%;
+  /* --- NEW LIGHTER GRADIENT --- */
+  background: linear-gradient(-45deg, #fbc2eb, #a18cd1, #89f7fe, #66a6ff);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  padding: 20px; /* Add some padding for smaller screens */
+  box-sizing: border-box;
+}
+
+.form-container.resources-container { /* Targeting the resources container */
+  max-width: 700px; /* Adjusted max-width for better readability */
+  width: 100%;
+  margin: 20px;
+  padding: 40px;
+
+  /* Lighter glass effect */
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+
+  animation: fadeIn 0.5s ease-out;
+}
+
+.form-container.resources-container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  /* --- TEXT COLOR CHANGED TO DARK --- */
+  color: #3a3a3a;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.form-container.resources-container .intro-text {
+  text-align: center;
+  color: #4a4a4a;
+  font-size: 1.1rem;
+  margin-bottom: 40px;
+}
+
+.form-container.resources-container .resource-card {
+  margin-bottom: 30px;
+  padding: 30px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.form-container.resources-container .resource-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.form-container.resources-container .resource-card h2 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.form-container.resources-container .resource-card p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.form-container.resources-container .resource-card a {
+  display: inline-block;
+  padding: 12px 24px;
+  background-image: linear-gradient(to right, #8e44ad 0%, #c33764 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3);
+}
+
+.form-container.resources-container .resource-card a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(142, 68, 173, 0.5);
+}
+
+/* --- STYLE FOR THE NEW BACK BUTTON --- */
+.back-btn {
+  background: none;
+  border: none;
+  color: #4a4a4a;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 20px;
+  padding: 8px 0;
+  display: inline-block;
+  transition: color 0.2s ease;
+}
+
+.back-btn:hover {
+  color: #8e44ad;
+}

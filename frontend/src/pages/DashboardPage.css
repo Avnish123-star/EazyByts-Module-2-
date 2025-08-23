@@ -1,0 +1,204 @@
+/* --- Keyframe Animations --- */
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Overall Page Layout --- */
+.dashboard-container {
+  padding: 30px;
+  min-height: 100vh;
+  /* --- NEW: Very Light Animated Gradient --- */
+  background: linear-gradient(-45deg, #e0c3fc, #8ec5fc, #a8edea, #fed6e3);
+  background-size: 400% 400%;
+  animation: gradientBG 18s ease infinite;
+}
+
+/* --- General "Light Glass" Card Styling --- */
+.dashboard-form, 
+.portfolio-container, 
+.chart-container {
+  background: rgba(255, 255, 255, 0.4); /* Brighter glass effect */
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(100, 100, 135, 0.15);
+  padding: 30px;
+  margin-bottom: 30px;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.portfolio-container h2, .dashboard-form h2 {
+  color: #2c3e50; /* Dark text for readability */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 15px;
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+}
+
+/* --- Table Styling --- */
+.portfolio-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.portfolio-list th, .portfolio-list td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.portfolio-list th {
+  color: #000000ff; 
+  font-weight: 800;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+   background-color: #89899dff;
+}
+
+.portfolio-list td {
+  color: #1d1d1fff; /* Dark text */
+  font-weight: 800;
+}
+
+.clickable-cell {
+  cursor: pointer;
+}
+
+.portfolio-list tr:hover .clickable-cell {
+  background-color: rgba(238, 193, 193, 0.5); /* Hover effect for table rows */
+}
+
+/* --- Chart Styling --- */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.chart-placeholder {
+  text-align: center;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+/* --- Button Styling (Clean & Light) --- */
+.chart-type-selector {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.chart-type-selector button {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background-color: rgba(255, 255, 255, 0.5);
+  color: #4b5563;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+}
+
+.chart-type-selector button:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-color: #9ca3af;
+}
+
+.chart-type-selector button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.toggle-form-btn, .submit-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff; /* Professional Blue */
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+}
+
+.toggle-form-btn:hover, .submit-btn:hover {
+  transform: translateY(-2px);
+  background-color: #0056b3;
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+}
+
+.add-stock-toggle {
+  margin-bottom: 20px;
+  text-align: right;
+}
+.toggle-form-btn { width: auto; }
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.delete-btn:hover {
+  background-color: #fee2e2;
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+/* --- Form Input Styling --- */
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.5);
+  color: #111827;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+
+
+
+/* Add this to the end of your CSS file */
+@media screen and (max-width: 768px) {
+  .table-wrapper {
+    overflow-x: auto;
+  }
+  .portfolio-list table {
+    min-width: 600px;
+  }
+}
