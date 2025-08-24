@@ -2,7 +2,7 @@ import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AuthContext from '../context/AuthContext';
-import './LoginPage.css'; // Your separate CSS file
+import './LoginPage.css';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -15,7 +15,8 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const { data } = await axios.post(
-        'http://localhost:5000/api/users/login',
+        // --- THIS IS THE UPDATED LINE ---
+        `${import.meta.env.VITE_API_URL}/api/users/login`,
         { email, password }
       );
       login(data); 
@@ -27,7 +28,6 @@ const LoginPage = () => {
   };
 
   return (
-    // --- ONLY THIS WRAPPER DIV WAS ADDED ---
     <div className="login-page-wrapper"> 
       <div className="form-container">
         <h1>Sign In</h1>
