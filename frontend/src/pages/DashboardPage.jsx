@@ -25,18 +25,20 @@ const DashboardPage = () => {
     if (!userInfo) return;
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data: portfolioData } = await axios.get('http://localhost:5000/api/portfolio', config);
+      // --- URL UPDATED HERE ---
+      const { data: portfolioData } = await axios.get(`${import.meta.env.VITE_API_URL}/api/portfolio`, config);
       setPortfolio(portfolioData);
       
       // Keep this commented to avoid API limit errors during development
-      fetchLivePrices(portfolioData);
+      // fetchLivePrices(portfolioData);
 
     } catch (error) { console.error('Failed to fetch portfolio', error); }
   };
 
   const fetchLivePrices = async (portfolioStocks) => {
     const promises = portfolioStocks.map(stock =>
-      axios.get(`http://localhost:5000/api/stocks/${stock.symbol}`)
+      // --- URL UPDATED HERE ---
+      axios.get(`${import.meta.env.VITE_API_URL}/api/stocks/${stock.symbol}`)
     );
     try {
       const responses = await Promise.all(promises);
@@ -58,7 +60,8 @@ const DashboardPage = () => {
     setLoadingChart(true);
     setChartData(null);
     try {
-      const { data } = await axios.get(`http://localhost:5000/api/stocks/history/${stockSymbol}`);
+      // --- URL UPDATED HERE ---
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/stocks/history/${stockSymbol}`);
       setChartData(data);
     } catch (error) { console.error('Failed to fetch chart data', error); alert('Could not fetch historical data.'); }
     finally { setLoadingChart(false); }
@@ -69,7 +72,8 @@ const DashboardPage = () => {
     const newStock = { symbol, quantity: Number(quantity), purchasePrice: Number(purchasePrice) };
     try {
       const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${userInfo.token}` } };
-      await axios.post('http://localhost:5000/api/portfolio/add', newStock, config);
+      // --- URL UPDATED HERE ---
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/portfolio/add`, newStock, config);
       fetchPortfolio();
       setSymbol('');
       setQuantity('');
@@ -82,7 +86,8 @@ const DashboardPage = () => {
     if (window.confirm('Are you sure you want to delete this stock?')) {
       try {
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-        await axios.delete(`http://localhost:5000/api/portfolio/${stockId}`, config);
+        // --- URL UPDATED HERE ---
+        await axios.delete(`${import.meta.env.VITE_API_URL}/api/portfolio/${stockId}`, config);
         fetchPortfolio();
       } catch (error) { console.error('Failed to delete stock', error); alert('Failed to delete stock.'); }
     }
@@ -129,47 +134,45 @@ const DashboardPage = () => {
           <div className="portfolio-container">
             <h2>Your Portfolio</h2>
             <div className="portfolio-list">
-              {portfolio.length === 0 ? <p>Your portfolio is empty.</p> : (
-                <div className="table-wrapper">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Symbol</th>
-                        <th>Quantity</th>
-                        <th>Purchase Price</th>
-                        <th>Current Price</th>
-                        <th>Total Value</th>
-                        <th>Profit/Loss</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {portfolio.map((stock) => {
-                        const currentPrice = liveData[stock.symbol] ? parseFloat(liveData[stock.symbol].price) : stock.purchasePrice;
-                        const totalValue = currentPrice * stock.quantity;
-                        const profitLoss = totalValue - (stock.purchasePrice * stock.quantity);
-                        return (
-                          <tr key={stock._id}>
-                            <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">{stock.symbol}</td>
-                            <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">{stock.quantity}</td>
-                            <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">${stock.purchasePrice.toFixed(2)}</td>
-                            <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">${currentPrice.toFixed(2)}</td>
-                            <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">${totalValue.toFixed(2)}</td>
-                            <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell" style={{ color: profitLoss >= 0 ? 'green' : 'red' }}>
-                              ${profitLoss.toFixed(2)}
-                            </td>
-                            <td>
-                              <button className="delete-btn" onClick={() => deleteStockHandler(stock._id)}>
-                                🗑️Delete
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>Quantity</th>
+                      <th>Purchase Price</th>
+                      <th>Current Price</th>
+                      <th>Total Value</th>
+                      <th>Profit/Loss</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {portfolio.map((stock) => {
+                      const currentPrice = liveData[stock.symbol] ? parseFloat(liveData[stock.symbol].price) : stock.purchasePrice;
+                      const totalValue = currentPrice * stock.quantity;
+                      const profitLoss = totalValue - (stock.purchasePrice * stock.quantity);
+                      return (
+                        <tr key={stock._id}>
+                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">{stock.symbol}</td>
+                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">{stock.quantity}</td>
+                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">${stock.purchasePrice.toFixed(2)}</td>
+                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">${currentPrice.toFixed(2)}</td>
+                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">${totalValue.toFixed(2)}</td>
+                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell" style={{ color: profitLoss >= 0 ? 'green' : 'red' }}>
+                            ${profitLoss.toFixed(2)}
+                          </td>
+                          <td>
+                            <button className="delete-btn" onClick={() => deleteStockHandler(stock._id)}>
+                              🗑️Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </>
@@ -179,7 +182,6 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
-
 
 
 
