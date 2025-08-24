@@ -1,40 +1,38 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect, useContext } from 'react'; // Import useEffect
-import { io } from 'socket.io-client'; // Import io
-import { ToastContainer, toast } from 'react-toastify'; // Import toast
-import 'react-toastify/dist/ReactToastify.css'; // Import toast CSS
+import { useEffect, useContext } from 'react';
+import { io } from 'socket.io-client';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import AuthContext from './context/AuthContext'; // Import AuthContext
+import AuthContext from './context/AuthContext';
 import Header from './components/Header';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ResourcesPage from './pages/ResourcesPage';
 
+// --- 1. DEFINE THE BACKEND URL FROM THE ENVIRONMENT VARIABLE ---
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 function App() {
   const { userInfo } = useContext(AuthContext);
 
   useEffect(() => {
-    // This code runs when the user logs in or out
     if (userInfo) {
-      // 1. Connect to the real-time server
-      const socket = io('http://localhost:5000');
+      // --- 2. USE THE API_URL VARIABLE FOR THE CONNECTION ---
+      const socket = io(API_URL);
 
-      // 2. Register the user with the server
       socket.emit('registerUser', userInfo._id);
 
-      // 3. Listen for 'priceAlert' messages from the server
       socket.on('priceAlert', (data) => {
-        // Show a pop-up notification
         toast.info(data.message);
       });
 
-      // 4. Disconnect when the user logs out or closes the page
       return () => {
         socket.disconnect();
       };
     }
-  }, [userInfo]); // Dependency array ensures this runs when userInfo changes
+  }, [userInfo]);
 
   return (
     <Router>
