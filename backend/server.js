@@ -18,12 +18,14 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     methods: ["GET", "POST"]
   }
 });
 
-app.use(cors());
+// --- THIS IS THE ONLY LINE THAT CHANGED ---
+app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
+
 app.use(express.json());
 
 // --- API Routes ---
@@ -37,9 +39,6 @@ let lastPrices = {}; // Stores the last known price of each stock
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
-
-    // ADD THIS LINE FOR TESTING
-  // socket.emit('priceAlert', { message: 'This is a test notification!' });
 
   // When frontend connects, it sends its userId
   socket.on('registerUser', (userId) => {
@@ -78,37 +77,31 @@ const checkPrices = async () => {
         const symbol = data['01. symbol'];
         const currentPrice = parseFloat(data['05. price']);
         
-        // 3. Compare with the last known price
         if (lastPrices[symbol] && lastPrices[symbol] !== currentPrice) {
           const priceChange = ((currentPrice - lastPrices[symbol]) / lastPrices[symbol]) * 100;
           
-          // 4. If price changed by more than 0.1%, send an alert
           if (Math.abs(priceChange) > 0.1) {
             console.log(`Price alert for ${symbol}: ${priceChange.toFixed(2)}%`);
             
-            // Find all users who own this stock
             const usersToAlert = await Portfolio.find({ symbol: symbol }).distinct('user');
 
             for (const userId of usersToAlert) {
               const socketId = userSockets[userId.toString()];
-              if (socketId) { // Check if the user is currently online
+              if (socketId) {
                 const alertMessage = `${symbol} price has changed by ${priceChange.toFixed(2)}%! New price: $${currentPrice.toFixed(2)}`;
                 io.to(socketId).emit('priceAlert', { message: alertMessage });
               }
             }
           }
         }
-        // 5. Update the last known price
         lastPrices[symbol] = currentPrice;
       }
     }
   } catch (error) {
-    // We log the error but don't crash the server. Usually due to API limits.
     console.error('Error in checkPrices:', error.data ? error.data.Information : error.message);
   }
 };
 
-// Run the price checker every 60 seconds (60000 milliseconds)
 setInterval(checkPrices, 60000);
 
 
