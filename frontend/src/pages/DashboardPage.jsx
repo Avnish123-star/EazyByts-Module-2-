@@ -405,24 +405,22 @@ const DashboardPage = () => {
   const [loadingChart, setLoadingChart] = useState(false);
   const [chartType, setChartType] = useState('line');
   const [showAddForm, setShowAddForm] = useState(false);
-  const [loadingPrices, setLoadingPrices] = useState(false); // For refresh button
 
-  // On page load, only fetch portfolio, not live prices
   const fetchPortfolio = async () => {
     if (!userInfo) return;
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       const { data: portfolioData } = await axios.get(`${import.meta.env.VITE_API_URL}/api/portfolio`, config);
       setPortfolio(portfolioData);
+      
+      fetchLivePrices(portfolioData);
+
     } catch (error) { console.error('Failed to fetch portfolio', error); }
   };
 
-  // This function is now only called by the Refresh button
-  const fetchLivePrices = async () => {
-    if (portfolio.length === 0) return;
-    setLoadingPrices(true);
+  const fetchLivePrices = async (portfolioStocks) => {
     try {
-      const promises = portfolio.map(stock =>
+      const promises = portfolioStocks.map(stock =>
         axios.get(`${import.meta.env.VITE_API_URL}/api/stocks/${stock.symbol}`)
       );
       const responses = await Promise.all(promises);
@@ -432,19 +430,14 @@ const DashboardPage = () => {
         return acc;
       }, {});
       setLiveData(livePriceData);
-    } catch (error) {
-      console.error('Failed to fetch live stock prices due to API limit.');
-      alert('Could not fetch live prices. You may have reached the API limit for today.');
-    } finally {
-      setLoadingPrices(false);
-    }
+    } catch (error) { console.error('Failed to fetch live stock prices due to API limit.'); }
   };
   
   useEffect(() => {
     fetchPortfolio();
   }, [userInfo]);
 
-  // This function now has the smart fallback to mock data
+  // --- THIS IS THE ONLY FUNCTION THAT HAS BEEN CHANGED ---
   const handleRowClick = async (stockSymbol) => {
     setSelectedStock(stockSymbol);
     setLoadingChart(true);
@@ -464,6 +457,7 @@ const DashboardPage = () => {
       setChartData(mockChartData);
       
     } finally {
+      // This will run after either try or catch is finished
       setLoadingChart(false);
     }
   };
@@ -501,46 +495,69 @@ const DashboardPage = () => {
       </div>
       
       {showAddForm ? (
-        <div className="form-container dashboard-form">{/*... form code ...*/}</div>
+        <div className="form-container dashboard-form">
+          <h2>Add New Stock</h2>
+          <form onSubmit={addStockHandler}>
+            <div className="form-group"><label>Stock Symbol</label><input type="text" value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} required /></div>
+            <div className="form-group"><label>Quantity</label><input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} required /></div>
+            <div className="form-group"><label>Purchase Price</label><input type="number" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)} required /></div>
+            <button type="submit" className="submit-btn">Add Stock</button>
+          </form>
+        </div>
       ) : (
         <>
-          <div className="charts-grid">{/*... charts code ...*/}</div>
+          <div className="charts-grid">
+            <div className="chart-container">
+              {selectedStock ? (
+                <>
+                  <div className="chart-type-selector">
+                    <button onClick={() => setChartType('line')} className={chartType === 'line' ? 'active' : ''}>Line Chart</button>
+                    <button onClick={() => setChartType('bar')} className={chartType === 'bar' ? 'active' : ''}>Bar Chart</button>
+                  </div>
+                  {loadingChart && <ClipLoader color="#3498db" loading={loadingChart} size={50} />}
+                  {chartData && <StockChart chartData={chartData} stockSymbol={selectedStock} chartType={chartType} />}
+                </>
+              ) : ( <p className="chart-placeholder">Click on a stock in your portfolio to see its price history.</p> )}
+            </div>
+            <div className="chart-container">
+              {portfolio.length > 0 ? ( <PortfolioPieChart portfolio={portfolio} liveData={liveData} /> ) : ( <p className="chart-placeholder">Add stocks to see your portfolio distribution.</p> )}
+            </div>
+          </div>
 
           <div className="portfolio-container">
-            <div className="portfolio-header">
-              <h2>Your Portfolio</h2>
-              <button onClick={fetchLivePrices} className="refresh-btn" disabled={loadingPrices}>
-                {loadingPrices ? 'Refreshing...' : 'Refresh Prices'}
-              </button>
-            </div>
+            <h2>Your Portfolio</h2>
             <div className="portfolio-list">
               <div className="table-wrapper">
                 <table>
-                  <thead>{/*... table headers ...*/}</thead>
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>Quantity</th>
+                      <th>Purchase Price</th>
+                      <th>Current Price</th>
+                      <th>Total Value</th>
+                      <th>Profit/Loss</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
                   <tbody>
                     {portfolio.map((stock) => {
-                      const livePriceInfo = liveData[stock.symbol];
-                      const currentPrice = livePriceInfo ? parseFloat(livePriceInfo.price) : null;
-                      const totalValue = currentPrice ? currentPrice * stock.quantity : null;
-                      const profitLoss = totalValue ? totalValue - (stock.purchasePrice * stock.quantity) : null;
-                      
+                      const currentPrice = liveData[stock.symbol] ? parseFloat(liveData[stock.symbol].price) : stock.purchasePrice;
+                      const totalValue = currentPrice * stock.quantity;
+                      const profitLoss = totalValue - (stock.purchasePrice * stock.quantity);
                       return (
                         <tr key={stock._id}>
                           <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">{stock.symbol}</td>
                           <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">{stock.quantity}</td>
                           <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">${stock.purchasePrice.toFixed(2)}</td>
-                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">
-                            {currentPrice ? `$${currentPrice.toFixed(2)}` : '---'}
-                          </td>
-                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">
-                            {totalValue ? `$${totalValue.toFixed(2)}` : '---'}
-                          </td>
-                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell" style={{ color: profitLoss === null ? '#6b7280' : profitLoss >= 0 ? 'green' : 'red' }}>
-                            {profitLoss !== null ? `$${profitLoss.toFixed(2)}` : '---'}
+                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">${currentPrice.toFixed(2)}</td>
+                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell">${totalValue.toFixed(2)}</td>
+                          <td onClick={() => handleRowClick(stock.symbol)} className="clickable-cell" style={{ color: profitLoss >= 0 ? 'green' : 'red' }}>
+                            ${profitLoss.toFixed(2)}
                           </td>
                           <td>
                             <button className="delete-btn" onClick={() => deleteStockHandler(stock._id)}>
-                              🗑️
+                              🗑️Delete
                             </button>
                           </td>
                         </tr>
